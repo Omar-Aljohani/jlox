@@ -1,0 +1,8 @@
+/*  This is a test file
+    This file should test how my lox
+    programming language is working
+*/
+
+fun main(){
+    print "Hello World!";
+}
