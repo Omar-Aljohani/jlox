@@ -4,6 +4,20 @@ import java.util.List;
 
 import static lox.TokenType.*;
 
+/*
+ * expression     → equality ;
+ * ternary        → equality ("?" expression ":" expression)* ;
+    equality       → comparison ( ( "!=" | "==" ) comparison )* ;
+    comparison     → term ( ( ">" | ">=" | "<" | "<=" ) term )* ;
+    term           → factor ( ( "-" | "+" ) factor )* ;
+    factor         → unary ( ( "/" | "*" ) unary )* ;
+    unary          → ( "!" | "-" ) unary
+                | primary ;
+    primary        → NUMBER | STRING | "true" | "false" | "nil"
+                | "(" expression ")" | CommaOps;
+    CommaOps      → expression ( "," expression )* ;
+ */
+
 class Parser {
     private static class ParseError extends RuntimeException {
     }
@@ -24,7 +38,16 @@ class Parser {
     }
 
     private Expr expression() {
-        return equality();
+        Expr expr = equality();
+        if (match(QUESTIONMARK)) {
+            Token questionMark = previous();
+            Expr thenBranch = expression();
+            consume(TokenType.COLON, "Expect ':' after then branch of conditional expression.");
+            Token colon = previous();
+            Expr elseBranch = expression();
+            expr = new Expr.Ternary(expr, questionMark, thenBranch, colon, elseBranch);
+        }
+        return expr;
     }
 
     private Expr equality() {
@@ -101,6 +124,13 @@ class Parser {
             Expr expr = expression();
             consume(RIGHT_PAREN, "Expect ')' after expression.");
             return new Expr.Grouping(expr);
+        }
+        if (match(COMMA)) {
+            Expr expr = expression();
+            while (match(COMMA)) {
+                return expression();
+            }
+            return expr;
         }
         throw error(peek(), "Expect expression.");
     }

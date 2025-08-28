@@ -26,6 +26,13 @@ public class RPNPrinter implements Expr.Visitor<String> {
         return expr.expression.accept(this);
     }
 
+    public String visitTernaryExpr(Expr.Ternary expr) {
+        return expr.thenBranch.accept(this) + " " +
+                expr.elseBranch.accept(this) + " " +
+                expr.questionMark.lexeme + " " +
+                expr.colon.lexeme;
+    }
+
     public static void main(String[] args) {
         Expr expression = new Expr.Binary(
                 new Expr.Unary(

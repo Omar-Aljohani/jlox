@@ -4,11 +4,38 @@ import java.util.List;
 
 abstract class Expr {
   interface Visitor<R> {
+    R visitTernaryExpr(Ternary expr);
+
     R visitBinaryExpr(Binary expr);
+
     R visitGroupingExpr(Grouping expr);
+
     R visitLiteralExpr(Literal expr);
+
     R visitUnaryExpr(Unary expr);
   }
+
+  static class Ternary extends Expr {
+    Ternary(Expr condition, Token questionMark, Expr thenBranch, Token colon, Expr elseBranch) {
+      this.condition = condition;
+      this.questionMark = questionMark;
+      this.thenBranch = thenBranch;
+      this.colon = colon;
+      this.elseBranch = elseBranch;
+    }
+
+    @Override
+    <R> R accept(Visitor<R> visitor) {
+      return visitor.visitTernaryExpr(this);
+    }
+
+    final Expr condition;
+    final Expr thenBranch;
+    final Expr elseBranch;
+    final Token questionMark;
+    final Token colon;
+  }
+
   static class Binary extends Expr {
     Binary(Expr left, Token operator, Expr right) {
       this.left = left;
@@ -25,6 +52,7 @@ abstract class Expr {
     final Token operator;
     final Expr right;
   }
+
   static class Grouping extends Expr {
     Grouping(Expr expression) {
       this.expression = expression;
@@ -37,6 +65,7 @@ abstract class Expr {
 
     final Expr expression;
   }
+
   static class Literal extends Expr {
     Literal(Object value) {
       this.value = value;
@@ -49,6 +78,7 @@ abstract class Expr {
 
     final Object value;
   }
+
   static class Unary extends Expr {
     Unary(Token operator, Expr right) {
       this.operator = operator;
